@@ -15,19 +15,21 @@
 
 
 ##importing the appropriate libraries
-# import pandas as pd
+import pandas as pd
 import time
 import random
 import redis
+from datetime import datetime
 
 # setting host, database, and port for simplicity
 # DO NOT HARDCODE
 r = redis.Redis(
-    host='127.0.0.1', port=6379, password='avila')
+    host='127.0.0.1', port=6379)
+
 
 #Additional method for inserting follows data
 def insert_follows_data():
-    follows = pd.read_csv('/Users/Vero/Downloads/follows_sample.csv')
+    follows = pd.read_csv('/Users/Vero/Downloads/hw1_data/follows.csv')
     print(len(follows))
     for i in range(len(follows)):
         hashName = f'follows_key_{i}'
@@ -35,16 +37,20 @@ def insert_follows_data():
         follows_id = str(follows.loc[i][1])
         r.hset(hashName, "user_id", user_id)
         r.hset(hashName, "follows_id", follows_id)
+        print(hashName)
         print(r.hgetall(hashName))
 
 
 class Tweets:
     # Insert a single tweet into Tweet table
-    def post_tweet(self):
+    def post_tweet(user, text):
         hashName = 'tweet_sample_insert'
-        r.hset(hashName, "user", "Vero")
-        r.hset(hashName, "tweet_text", "beautiful world, where are you?")
-        r.hset(hashName, "time_stamp", stoday)
+        r.hset(hashName, "user", user)
+        r.hset(hashName, "tweet_text", text)
+        #Time conversion into timestamp
+        ts = int(r.time()[0])
+        timestamp = datetime.utcfromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+        r.hset(hashName, "time_stamp", str(timestamp))
         print(hashName)
         print(r.hget(hashName, "tweet_text"))
         print(r.hget(hashName, "time_stamp"))
@@ -57,9 +63,13 @@ class Tweets:
             user_id = str(tweets.loc[i][0])
             r.hset(hashName, "user_id", user_id)
             r.hset(hashName, "tweet_text", tweets.loc[i][1])
-            r.hset(hashName, "time_stamp", stoday)
+            # Time conversion into timestamp
+            ts = int(r.time()[0])
+            timestamp = datetime.utcfromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+            r.hset(hashName, "time_stamp", timestamp)
             print(r.hgetall(hashName))
 
+   #still need to do
     # Retrieve tweets from person with given user_id
     def get_tweets(user_id):
         query = "SELECT * FROM TWEET WHERE TWEET.user_id = (%s) ORDER BY tweet_ts DESC"
@@ -76,6 +86,7 @@ class Tweets:
 
 
 class Timelines:
+    #Still need to do
     # Get a single timeline
     def get_timeline(user_id):
         cursor = cnx.cursor(buffered=True)
@@ -140,4 +151,5 @@ class Followers:
 
 # CALLING FUNCTIONS
 # Tweets.insert_tweets(pd.read_csv('/Users/Vero/Downloads/hw1_data/tweet.csv'))
-post_tweeet()
+Tweets.post_tweet("Vero", "never rains in California")
+#insert_follows_data()
