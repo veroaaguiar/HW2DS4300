@@ -57,6 +57,7 @@ class Tweets:
 
     # INSERT STATEMENT INTO TWEET TABLE
     def insert_tweets(csv):
+        start = time.time()
         tweets = pd.read_csv(csv)
         for i in range(len(tweets)):
             hashName = f'tweet_id_{i}'
@@ -68,21 +69,25 @@ class Tweets:
             timestamp = datetime.utcfromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
             r.hset(hashName, "time_stamp", timestamp)
             print(r.hgetall(hashName))
+        finish = time.time()
+        diff = finish - start
+        rate = len(tweets) / diff
+        print(f'Stored {len(tweets)} keys in {diff} seconds (Rate={rate}/sec')
 
-   #still need to do
+   #Not doing for now
     # Retrieve tweets from person with given user_id
-    def get_tweets(user_id):
-        query = "SELECT * FROM TWEET WHERE TWEET.user_id = (%s) ORDER BY tweet_ts DESC"
-        value = [user_id, ]
-        cursor.execute(query, value[0])
-        cnx.commit()
-        records = cursor.fetchmany(10)
-        for row in records:
-            print("User: ", row[1])
-            print("Tweet:", row[2])
-            print("Time Posted: ", row[3])
-            print("\n")
-        cursor.close()
+    # def get_tweets(user_id):
+    #     query = "SELECT * FROM TWEET WHERE TWEET.user_id = (%s) ORDER BY tweet_ts DESC"
+    #     value = [user_id, ]
+    #     cursor.execute(query, value[0])
+    #     cnx.commit()
+    #     records = cursor.fetchmany(10)
+    #     for row in records:
+    #         print("User: ", row[1])
+    #         print("Tweet:", row[2])
+    #         print("Time Posted: ", row[3])
+    #         print("\n")
+    #     cursor.close()
 
 
 class Timelines:
@@ -123,33 +128,53 @@ class Timelines:
         cursor.close()
 
 
-class Followers:
-# WHO IS FOLLOWING USER_ID?
-   def get_followers(user_id):
-    query = "SELECT FOLLOWS.user_id FROM FOLLOWS WHERE FOLLOWS.follows_id = (%s)"
-    value = [user_id,]
-    cursor.execute(query, (value[0],))
-    cnx.commit()
-    records = cursor.fetchmany(100)
-    for row in records:
-        print("Follower: ", row[0])
+# class Followers:
+# # WHO IS FOLLOWING USER_ID?
+#    def get_followers(user_id):
+#     query = "SELECT FOLLOWS.user_id FROM FOLLOWS WHERE FOLLOWS.follows_id = (%s)"
+#     value = [user_id,]
+#     cursor.execute(query, (value[0],))
+#     cnx.commit()
+#     records = cursor.fetchmany(100)
+#     for row in records:
+#         print("Follower: ", row[0])
+#
+#     cursor.close()
+#
+# # WHO IS USER_ID following?
+#     def get_followees(user_id):
+#         query = "SELECT FOLLOWS.follows_id FROM FOLLOWS WHERE FOLLOWS.user_id = (%s)"
+#         value = [user_id,]
+#         cursor.execute(query, (value[0],))
+#         cnx.commit()
+#         records = cursor.fetchmany(100)
+#         for row in records:
+#             print("Following: ", row[0])
+#
+#         cursor.close()
 
-    cursor.close()
+def trial_method():
+    for i in range(4):
+        tweet_text = "hello hello hello"
+        tweet_id = str(i)
+        time_stamp = str(2/14/2022)
+        value = tweet_id + "" + tweet_text + "" + time_stamp
+        r.sadd(f'tweet_trial_{i}', value)
+        #user_id = str(tweets.loc[i][0])
+        #r.hset(hashName, "user_id", user_id)
+        # r.hset(hashName, "tweet_text", tweets.loc[i][1])
+        # Time conversion into timestamp
+        #ts = int(r.time()[0])
+        #timestamp = datetime.utcfromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+        #r.hset(hashName, "time_stamp", timestamp)
 
-# WHO IS USER_ID following?
-    def get_followees(user_id):
-        query = "SELECT FOLLOWS.follows_id FROM FOLLOWS WHERE FOLLOWS.user_id = (%s)"
-        value = [user_id,]
-        cursor.execute(query, (value[0],))
-        cnx.commit()
-        records = cursor.fetchmany(100)
-        for row in records:
-            print("Following: ", row[0])
+        print(value)
 
-        cursor.close()
 
 
 # CALLING FUNCTIONS
 # Tweets.insert_tweets(pd.read_csv('/Users/Vero/Downloads/hw1_data/tweet.csv'))
-Tweets.post_tweet("Vero", "never rains in California")
+#Tweets.post_tweet("Vero", "never rains in California")
 #insert_follows_data()
+#Tweets.insert_tweets("/Users/Vero/Downloads/hw1_data/tweet.csv")
+trial_method()
