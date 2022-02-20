@@ -1,0 +1,14 @@
+HW2 PERFORMANCE:
+
+Sets: 
+INSERT FOLLOWS: Stored 30032 keys in 10.889110803604126 seconds (Rate=2757.9846088130425/sec
+INSERT TWEETS: Stored 1000000 keys in 693.7739980220795 seconds (Rate=1441.391581193527/sec)
+
+
+Lists:
+INSERT FOLLOWS: Stored 30032 keys in 11.386489152908325 seconds (Rate=2637.5118437915744/sec
+Insert Tweets Stored 1000000 keys in 735.7008829116821 seconds (Rate=1359.2480629387064/sec)
+
+Timelines: 
+Retrieved 2000 timelines in 0.3007678985595703 seconds (Rate=6649.64582183919/sec)
+Retrieved 200000 timelines in 27.52865195274353 seconds (Rate=7265.157783364246/sec)
