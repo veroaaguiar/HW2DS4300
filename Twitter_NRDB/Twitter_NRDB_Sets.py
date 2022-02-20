@@ -1,7 +1,15 @@
-# -*- coding: utf-8 -*-
-
 ##START OF API##
 
+#################################
+
+# This is NOT our final code. However, we tried implementing the database in two ways: Sets, and Lists. Below is the
+# code for lists, that returns ALL members of all timelines. Performance below:
+# INSERT FOLLOWS: Stored 30032 keys in 10.889110803604126 seconds (Rate=2757.9846088130425/sec)
+# INSERT TWEETS: Stored 1000000 keys in 693.7739980220795 seconds (Rate=1441.391581193527/sec)
+# Couldn't time get timelines because I had already switched method of insertion to lists before being able to call this
+# method :)
+
+#################################
 
 
 
@@ -12,6 +20,7 @@ import pandas as pd
 import time
 import redis
 from datetime import datetime
+
 
 # setting host, database, and port for simplicity
 # DO NOT HARDCODE!!!!!!!!!
@@ -31,12 +40,12 @@ def insert_follows_data():
         follows_id = str(follows.loc[i][1])
         key = f'user_{follows_id}_is_followed_by'
         value = user_id
-        r.lpush(key, value)
-        print(key + str(r.lrange(key, 0, 200)))
+        r.sadd(key, value)
+        print(key + str(r.smembers(key)))
     finish = time.time()
     diff = finish - start
     rate = len(follows) / diff
-    print(f'Stored {len(follows)} keys in {diff} seconds (Rate={rate}/sec')
+    print(f'Stored {len(follows)} keys in {diff} seconds (Rate={rate}/sec)')
 
 
 class Tweets:
@@ -53,16 +62,16 @@ class Tweets:
         #Insertion into redis
         key = f'tweet_{tweet_id}_by_user_{user_id}'
         value = tweet_id + " " + user_id + " " + tweet_text + " " + timestamp
-        r.lpush(key, value)
+        r.sadd(key, value)
 
-        #Insert into timeline automatically
+        #Insert into timeline
         followers = f'user_{user_id}_is_followed_by'
-        followers_list = r.lrange(followers, 0, 200 )
+        followers_list = list(r.smembers(followers))
         for i in followers_list:
             member = i
             key = f'timeline_of_@{member}'
             tl_value = "tweet: " + value
-            r.lpush(key, tl_value)
+            r.sadd(key, tl_value)
             print(member)
             print(key + " : " + value)
 
@@ -89,19 +98,18 @@ class Tweets:
             value = tweet_id + " " + user_id + " " + tweet_text + " " + timestamp
             print(key + " : " + value)
 
-            #Insert into timelines
+            #Insert into timelines!
             followers = f'user_{user_id}_is_followed_by'
-            followers_list = r.lrange(followers, 0, 3000)
-            print(followers_list)
+            followers_list = list(r.smembers(followers))
             for i in followers_list:
                 member = str(i)
                 member_cleaned_pre = member.replace("b'", "")
                 member_cleaned = member_cleaned_pre.replace("'", "")
+                print(member_cleaned)
                 key = f'timeline_of_@{member_cleaned}'
                 tl_value = "tweet: " + value
-                r.lpush(key, tl_value)
+                r.sadd(key, tl_value)
                 print(key + " : " + value)
-
 
         finish = time.time()
         diff = finish - start
@@ -114,9 +122,14 @@ class Tweets:
 class Timelines:
     # Get a single timeline
     def get_timeline(user_id):
+        #get the list of user_id's followers
+        #create new timeline for each of them
+        #call get tweets
         key = f'timeline_of_@{user_id}'
-        value = r.lrange(key, 0, 10,)
-        print(key + ": \n" + str(value))
+        #organize by timestamp and limit to 10
+        value = r.smembers(key)
+        print(key)
+        print(value)
 
 
 
@@ -126,8 +139,9 @@ class Timelines:
         for i in range(num):
             random_tl = random.randint(1, 10000)
             key = f'timeline_of_@{random_tl}'
-            T10_timeline =r.lrange(key, 0, 9)
-            print(key + ": \n" + str(T10_timeline))
+            value = r.smembers(key)
+            print(key)
+            print(value)
         finish = time.time()
         diff = finish - start
         rate = num / diff
@@ -141,8 +155,7 @@ class Timelines:
 # Tweets.insert_tweets(pd.read_csv('/Users/Vero/Downloads/hw1_data/tweet.csv'))
 #Tweets.post_tweet("2", "6897",'I really really hope this works!')
 #insert_follows_data()
-#Tweets.post_tweet("3", "2", "hello im trying this out")
 #Tweets.insert_tweets("/Users/Vero/Downloads/hw1_data/tweet.csv")
-#Timelines.get_timeline(6630)
+Timelines.get_timeline(2)
 #Timelines.get_random_timeline(200000)
-#Timelines.trial_method(23)
+print(random.randint(1, 10000))
